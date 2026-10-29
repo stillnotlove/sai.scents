@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#dddde0" />
+  <meta name="description" content="SAI — incense & objects. A contemporary interpretation of Kōdō, the way of fragrance." />
+  <title>SAI — INCENSE & OBJECTS.</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="preload" href="/assets/hero-logo.png" as="image" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="header" id="header">
+      <a class="header-identity" href="/" data-view="home" aria-label="SAI home">INCENSE &amp; OBJECTS<span class="point">.</span></a>
+      <nav aria-label="Primary navigation" class="header-nav">
+        <a href="/?view=collection" data-view="collection" class="nav-link" data-route-nav="collection">Collection</a>
+        <a href="/?view=philosophy" data-view="philosophy" class="nav-link" data-route-nav="philosophy">Philosophy</a>
+      </nav>
+      <a class="bag-trigger" href="/?view=bag" data-view="bag" aria-label="View bag">Bag <span id="bag-count">(00)</span></a>
+    </header>
+
+    <main id="view" aria-live="polite"></main>
+
+    <div id="page-veil" class="page-veil" aria-hidden="true">
+      <div class="veil-smoke"></div>
+    </div>
+    <div id="product-overlay" class="product-overlay" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

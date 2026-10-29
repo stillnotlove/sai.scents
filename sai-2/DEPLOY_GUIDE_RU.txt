@@ -1,0 +1,34 @@
+SAI — установка сайта через GitHub + Vercel (отдельно от 1337tools)
+
+1. Распакуйте архив SAI_website_Vercel_v2.zip. Внутри есть package.json, vercel.json, public/, scripts/, README.md.
+   Не загружайте ZIP как один файл в GitHub — нужны именно извлечённые файлы и папки.
+2. GitHub: https://github.com/new
+   Создайте НОВЫЙ репозиторий sai-incense-objects. Выберите Private при желании.
+   Это должен быть другой репозиторий, НЕ 1337tools.
+3. В новом репозитории: Add file → Upload files.
+   Перетащите СОДЕРЖИМОЕ распакованной папки: public/, scripts/, package.json, vercel.json, README.md и т.д.
+   На странице репозитория в корне должны оказаться package.json и папка public.
+   Нажмите Commit changes.
+4. Vercel: https://vercel.com/new
+   Add New → Project → импортируйте репозиторий sai-incense-objects (подключите GitHub при необходимости).
+   Project Name: sai-incense-objects (или уникальное другое имя)
+   Framework Preset: Other
+   Root Directory: ./ (корень репозитория)
+   Build Command: npm run build
+   Output Directory: dist
+   Environment Variables: не требуются
+   Нажмите Deploy.
+5. После удачного деплоя Vercel даст новый адрес вида https://sai-incense-objects-....vercel.app
+   Откройте его и проверьте главную, коллекцию, карточку товара и корзину.
+
+КАК НЕ ПОВРЕДИТЬ 1337tools
+- Не создавайте SAI внутри репозитория 1337tools.
+- На Vercel создавайте Add New → Project, не изменяйте существующий проект 1337tools.
+- Не переносите домен или env-переменные 1337tools на SAI.
+- Проверяйте имя импортируемого репозитория: только sai-incense-objects.
+
+ДАЛЬНЕЙШИЕ ИЗМЕНЕНИЯ
+- Обновите файлы в отдельном репозитории SAI и сделайте commit.
+- Vercel автоматически создаст новое развёртывание для этого проекта.
+- Корзина демонстрационная, оплаты нет; цены спичек и журнала не заданы.
+- Andale Mono не поставляется в архиве; если шрифт на устройстве не установлен, включается резервный моноширинный.

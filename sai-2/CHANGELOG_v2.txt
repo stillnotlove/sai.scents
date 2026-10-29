@@ -1,0 +1,13 @@
+SAI digital v2 (2026-10-29)
+- ONLY Collection page changed to #000000 background and white type.
+- White text in collection heading, meta, filters, product labels, names and prices.
+- Navigation automatically switches to dark mode while viewing Collection, including when scrolled.
+- Existing hero logo, Home page, product content, modal and cart are kept intact.
+- Visual preview images are provided separately; site uses the same previously approved media assets.
+
+Checks:
+- npm run check: PASS (JavaScript syntax, static build)
+- Browser interaction check via Playwright in isolated in-memory rendering due local HTTP being blocked in current environment: PASS.
+- Collection #000000 background and #ffffff text; header #ffffff: PASS.
+- 9 catalog products; product sheet opens; holder adds to bag; item count and total update; mobile viewport 390px without horizontal overflow: PASS.
+- External live Vercel deployment NOT tested. Browser delivery of site through HTTPS NOT yet tested.
