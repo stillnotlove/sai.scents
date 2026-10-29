@@ -1,0 +1,22 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const base=path.resolve(__dirname,'../public');
+const js=fs.readFileSync(path.join(base,'app.js'),'utf8');
+const css=fs.readFileSync(path.join(base,'styles.css'),'utf8');
+const html=fs.readFileSync(path.join(base,'index.html'),'utf8');
+const assert=(condition,message)=>{if(!condition)throw Error('SAI v9: '+message)};
+const declared=[...new Set([...js.matchAll(/'([A-Za-z0-9_-]+\.(?:png|webp|svg))'/g)].map(m=>m[1]))];
+for(const f of declared) assert(fs.existsSync(path.join(base,'assets',f)),'Missing referenced asset: '+f);
+for(const f of ['hero-logo.png','favicon.png','holder-main-hq.png','isao-mori-full.png','sticks-approved.png','matches-approved.png'])
+  assert(fs.existsSync(path.join(base,'assets',f)),'Required asset missing: '+f);
+assert(js.includes('id="intro-enter"'),'Intro missing');
+for(const id of ['holder','rice','matches','zine','vinyl'])assert(js.includes("id:'"+id+"'"),'Missing item '+id);
+assert((js.match(/id:'(?:holder|rice|matches|zine|vinyl)'/g)||[]).length===5,'Unexpected product count');
+assert(js.includes('product-card-feature')&&css.includes('grid-template-rows:180px 156px 156px'),'Fixed non-overlapping grid missing');
+assert(js.includes('isao-mori-full.png')&&!js.includes('philosophy-steel-detail.png'),'Philosophy photos not corrected');
+assert(!js.includes('image-gallery')&&!js.includes('data-photo'),'Holder carousel still exists');
+assert(js.includes('CONNECT')&&js.includes('sai.scents@info.com')&&js.includes('@sai.incense'),'Contact block missing');
+assert(js.includes('The face of SAI.')&&js.includes('Form reduced.'),'Two Philosophy text blocks missing');
+assert(css.includes('.page.route-exit')&&css.includes('overflow-y:auto'),'Navigation or scrolling missing');
+assert(html.includes('favicon.png'),'Favicon missing');
+console.log('SAI v9 static QA OK: '+declared.length+' referenced image assets available.');
