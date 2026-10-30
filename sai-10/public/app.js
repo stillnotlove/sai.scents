@@ -1,0 +1,206 @@
+(() => {
+  'use strict';
+  const $ = (s,b=document) => b.querySelector(s);
+  const $$ = (s,b=document) => [...b.querySelectorAll(s)];
+  const view = $('#view');
+  const header = $('#site-header');
+  const bagCount = $('#bag-count');
+  const modal = $('#product-modal');
+  const toast = $('#toast');
+  const asset = n => `/assets/${n}`;
+  const money = v => v == null ? '—' : `$${v}`;
+  let current = 'intro';
+  let moving = false;
+  let cart = {};
+  let toastTimer = null;
+  try { cart = JSON.parse(localStorage.getItem('sai_cart_demo') || '{}') || {}; } catch { cart = {}; }
+
+  // Only five approved collection entries. Unpriced editions are intentionally TBD.
+  const products = [
+    {id:'holder',index:'001',kind:'OBJECT STUDY',title:'Incense Holder',subtitle:'Brushed steel / study 001',price:55,image:'holder-main-hq.png',desc:'A precise steel object designed to hold one stick at an angle and keep the ritual visually calm.',meta:'Stainless steel / Object study / 001'},
+    {id:'rice',index:'002',kind:'SCENT',title:'Rice Smoke',subtitle:'Rice / paper / soft smoke',price:15,image:'sticks-approved.png',desc:'Soft and restrained. Rice, pale smoke, and a smooth paper-like calm.',meta:'Incense sticks / Scent study / 002'},
+    {id:'matches',index:'003',kind:'IGNITION',title:'Matches',subtitle:'Long safety matches',price:null,image:'matches-approved.png',desc:'Long monochrome safety matches designed to accompany the ritual.',meta:'Ignition / Accessory / 003'},
+    {id:'zine',index:'004',kind:'PHILOSOPHY',title:'Zine',subtitle:'SAI printed study',price:null,image:null,desc:'An editorial study of fragrance, objects and attention. More details will be added later.',meta:'Philosophy / Printed edition / 004'},
+    {id:'vinyl',index:'005',kind:'VINYL',title:'Vinyl',subtitle:'SAI sound edition',price:null,image:null,desc:'A forthcoming sound edition. Artwork and details will be added later.',meta:'Vinyl / Sound edition / 005'}
+  ];
+
+  function setCount(){
+    const total = Object.values(cart).reduce((a,b)=>a+(Number(b)||0),0);
+    bagCount.textContent = `(${String(total).padStart(2,'0')})`;
+    try { localStorage.setItem('sai_cart_demo', JSON.stringify(cart)); } catch {}
+  }
+
+  function showToast(message){
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toast.classList.remove('show'), 1800);
+  }
+
+  function syncHeader(){
+    const hidden = current === 'intro';
+    const dark = current === 'philosophy' || current === 'collection';
+    header.classList.toggle('hidden', hidden);
+    header.classList.toggle('dark', dark);
+    $$('[data-route]').forEach(link => link.classList.toggle('active', link.dataset.route === current));
+  }
+
+  function introPage(){
+    return `<button type="button" class="page intro-page" id="intro-enter" aria-label="Enter SAI collection">
+      <picture class="intro-picture"><source media="(max-width:760px)" srcset="${asset('hero-symbol-mobile.png')}"/><img src="${asset('hero-logo.png')}" alt="SAI" class="intro-logo" fetchpriority="high" draggable="false"/></picture>
+    </button>`;
+  }
+
+  function collectionPage(){
+    return `<section class="page collection-page" aria-labelledby="collection-heading">
+      <div class="collection-head"><div><div class="eyebrow">SAI / OBJECT INDEX — 001—005</div><h1 id="collection-heading">The collection.</h1></div>
+      <p>Objects and incense for the way we experience space.</p></div>
+      <div class="collection-grid">${products.map(cardHTML).join('')}</div>
+      <footer class="collection-end" aria-label="Contact SAI"><div class="connect-block"><span class="connect-heading">CONNECT</span><a href="https://www.instagram.com/sai.incense/" target="_blank" rel="noopener noreferrer">INST — @sai.incense</a><a href="mailto:sai.scents@info.com">MAIL — sai.scents@info.com</a></div></footer>
+    </section>`;
+  }
+
+  function cardHTML(p){
+    const price = p.price===null ? 'TBD' : money(p.price);
+    return `<article class="product-card ${p.id==='holder'?'product-card-feature':''}" data-product="${p.id}" tabindex="0" role="button" aria-label="View ${p.title}">
+      <span class="product-card-index">${p.kind} / ${p.index}</span>
+      <span class="product-card-arrow" aria-hidden="true">↗</span>
+      <div class="product-card-title">${p.title}</div>
+      <span class="product-card-price">${price}</span>
+    </article>`;
+  }
+
+  function philosophyPage(){
+    return `<section class="page philosophy-page" aria-label="SAI philosophy">
+      <div class="philosophy-hero">
+        <div><div class="eyebrow">SAI / PHILOSOPHY</div><h1>The art of<br/>listening.</h1></div>
+        <div class="philosophy-intro">Kōdō is the Japanese practice of appreciating fragrance.<span class="philosophy-next-sentence">It asks us to pay attention — not simply to what an aroma smells like, but to how it occupies a moment.</span></div>
+      </div>
+      <div class="philosophy-sections">
+        <div class="philosophy-layout">
+          <div class="philosophy-portrait"><img src="${asset('isao-mori-full.png')}" alt="Portrait of Isao Mori, the symbolic face of SAI" width="1122" height="1402" decoding="async" fetchpriority="high" /></div>
+          <div class="philosophy-texts">
+            <div class="philosophy-card text"><div>
+              <div class="philosophy-note">A quiet figure / Isao Mori</div>
+              <h2>The face of SAI.</h2>
+              <p>Isao Mori acts as a symbolic guide for the brand — not as a loud founder figure, but as a calm presence shaped by the spirit of Kōdō. He represents attention, restraint and a sensitivity to atmosphere.</p>
+            </div><p>Fragrance is treated not as ornament, but as a medium: something that changes the emotional density of a room.</p></div>
+            <div class="philosophy-card text"><div>
+              <div class="philosophy-note">Object study / 001</div>
+              <h2>Form reduced.</h2>
+              <p>Each object is edited back to essentials. The holder keeps the gesture simple. The stick becomes a line. The ash becomes a record of time. Nothing more needs to happen.</p>
+            </div><p>Materials remain honest, silhouettes stay controlled, and the interface between hand, object and scent remains clear.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function bagPage(){
+    const items = products.filter(p => p.price != null && cart[p.id] > 0);
+    const count = items.reduce((a,p)=>a+cart[p.id],0);
+    const subtotal = items.reduce((a,p)=>a+(cart[p.id]*p.price),0);
+    return `<section class="page bag-page"><div class="bag-hero"><div><div class="eyebrow">Bag / SAI</div><h1>Your selection.</h1></div><div class="eyebrow">${String(count).padStart(2,'0')} items</div></div><div class="bag-grid"><div class="bag-box">${items.length ? items.map(itemHTML).join('') : `<div class="empty-state"><div><h2>Nothing here. Yet.</h2><p>Select an object to begin.</p><a href="/?view=collection" data-view="collection" class="pill-button"><span>Explore collection</span><span>↗</span></a></div></div>`}</div><aside class="summary-box"><div class="eyebrow" style="margin-bottom:8px">Order summary</div><div class="summary-line"><span>Items (${count})</span><span>${money(subtotal)}</span></div><div class="summary-line"><span>Shipping</span><span>—</span></div><div class="summary-total"><span>Total</span><span>${money(subtotal)}</span></div><button class="pill-button" type="button" data-demo-checkout ${count ? '' : 'disabled'}><span>Continue</span><span>↗</span></button></aside></div></section>`;
+  }
+
+  function itemHTML(p){
+    return `<div class="bag-item"><img src="${asset(p.image)}" alt="${p.title}"/><div><div class="item-title">${p.title}</div><div class="item-meta">${p.subtitle}</div><div class="qty-row"><button type="button" data-qty="${p.id}" data-delta="-1">−</button><span>${String(cart[p.id]).padStart(2,'0')}</span><button type="button" data-qty="${p.id}" data-delta="1">+</button></div></div><div class="item-price">${money(p.price*cart[p.id])}</div></div>`;
+  }
+
+  function modalHTML(p){
+    // Approved single-view presentation: no extra photos, dots or image carousel.
+    const modalPicture = p.image ? `<img src="${asset(p.image)}" alt="${p.title}" decoding="async" />` : `<div class="placeholder-box">Image coming later</div>`;
+    return `<div class="modal-backdrop" data-close-modal="true"></div><section class="modal-sheet" role="dialog" aria-modal="true" aria-label="${p.title}"><div class="modal-top"><div class="eyebrow" style="margin:0">${p.meta}</div><button class="close-button" data-close-modal="true" aria-label="Close">×</button></div><div class="modal-visual">${modalPicture}</div><div class="modal-info"><h2>${p.title}.</h2><div class="modal-copy">${p.desc}</div><div class="modal-meta"><span>${p.subtitle}</span><span>${money(p.price)}</span></div>${p.price != null ? `<button class="pill-button" type="button" data-add="${p.id}"><span>Add to bag</span><span>${money(p.price)}</span></button>` : `<button class="pill-button" type="button" disabled><span>Coming later</span><span>—</span></button>`}</div></section>`;
+  }
+
+  function pageHTML(name){
+    return name === 'collection' ? collectionPage() : name === 'philosophy' ? philosophyPage() : name === 'bag' ? bagPage() : introPage();
+  }
+
+  function render(){
+    // Instant render is reserved for the initial page and updates within the same route.
+    view.innerHTML=pageHTML(current);
+    view.style.backgroundColor = (current==='collection' || current==='philosophy') ? '#000000' : current==='bag' ? '#ffffff' : '#dddde0';
+    syncHeader();
+    setCount();
+  }
+
+  function valid(v){ return ['intro','collection','philosophy','bag'].includes(v) ? v : 'intro'; }
+
+  function navigate(next, push=true){
+    next = valid(next);
+    if(next === current || moving) return;
+    closeModal();
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      current=next;
+      if(push) history.pushState({view:next}, '', next==='intro'?'/':`/?view=${next}`);
+      render();
+      return;
+    }
+    moving=true;
+    const previous=view.querySelector('.page:last-child');
+    const template=document.createElement('template');
+    template.innerHTML=pageHTML(next).trim();
+    const incoming=template.content.firstElementChild;
+    incoming.classList.add('route-initial');
+    view.appendChild(incoming);
+    // Match the destination background so no grey or white flash appears between dark pages.
+    view.style.backgroundColor = (next==='collection' || next==='philosophy') ? '#000000' : next==='bag' ? '#ffffff' : '#dddde0';
+    // Preload the next screen while both views are in the DOM.
+    current=next;
+    if(push) history.pushState({view:next}, '', next==='intro'?'/':`/?view=${next}`);
+    syncHeader();
+    setCount();
+    // Force initial style to commit before triggering the dissolve; unlike chained
+    // animation-frame callbacks, this also works in background/throttled tabs.
+    void incoming.offsetWidth;
+    incoming.classList.add('route-visible');
+    if(previous) previous.classList.add('route-exit');
+    window.setTimeout(()=>{
+      if(previous && previous.isConnected) previous.remove();
+      incoming.classList.remove('route-initial','route-visible');
+      moving=false;
+    },560);
+  }
+
+  function openModal(id){
+    const p = products.find(x => x.id === id); if(!p) return;
+    modal.innerHTML = modalHTML(p); modal.hidden = false; document.body.style.overflow='hidden';
+  }
+  function closeModal(){ modal.hidden = true; modal.innerHTML=''; document.body.style.overflow=''; }
+
+  document.addEventListener('click', e => {
+    const viewLink = e.target.closest('[data-view]');
+    if(viewLink){ e.preventDefault(); navigate(viewLink.dataset.view); return; }
+    if(e.target.closest('#intro-enter')){ navigate('collection'); return; }
+    const product = e.target.closest('[data-product]');
+    if(product){ openModal(product.dataset.product); return; }
+    if(e.target.closest('[data-close-modal]')){ closeModal(); return; }
+    const add = e.target.closest('[data-add]');
+    if(add){ const id = add.dataset.add; cart[id] = (cart[id]||0)+1; setCount(); closeModal(); showToast('Added to bag.'); return; }
+    const qty = e.target.closest('[data-qty]');
+    if(qty){ const id=qty.dataset.qty, delta=Number(qty.dataset.delta); cart[id]=Math.max(0,(cart[id]||0)+delta); if(!cart[id]) delete cart[id]; render(); return; }
+    if(e.target.closest('[data-demo-checkout]')) showToast('Visual demo only.');
+  });
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeModal();
+    const card = e.target.closest?.('[data-product]');
+    if(card && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); openModal(card.dataset.product); }
+  });
+
+  window.addEventListener('popstate', ()=> {
+    const qs = new URLSearchParams(location.search);
+    const destination=valid(qs.get('view') || 'intro');
+    if(destination===current) return;
+    if(moving){
+      // Prefer browser history over an unfinished previous animation.
+      current=destination;
+      moving=false;
+      render();
+    } else navigate(destination,false);
+  });
+
+  current = valid(new URLSearchParams(location.search).get('view') || 'intro');
+  render();
+})();
